@@ -1,7 +1,7 @@
-import { DateHelper } from 'src/helpers/date-helper';
-import { reportColumns } from 'src/shared/constants/report.constant';
-import { ReportDTO } from 'src/shared/dto/report.dto';
-import { number, object, string } from 'yup';
+import { DateHelper } from '@/helpers/date-helper';
+import { reportColumns } from '@/shared/constants/report.constant';
+import { ReportDataMappedCSVDTO } from '@/shared/dtos/report-data.dto';
+import { number, object, string, ValidationError } from 'yup';
 
 export class ReportValidation {
   public static getInvalidColumn(columns: string[]): string {
@@ -14,30 +14,52 @@ export class ReportValidation {
     return null;
   }
 
-  public static async getBodyError(data: ReportDTO): Promise<string> {
+  public static async getReportDataError(
+    data: ReportDataMappedCSVDTO,
+  ): Promise<string> {
     const reportSchema = object({
-      'quantidade cobranças': number()
+      numberOfCharges: number()
         .required()
         .typeError('Quantidade de cobrança inválida.'),
-      'cobrada a cada X dias': number()
+      chargedEveryXDays: number()
         .required()
         .typeError('Intervalo de cobrança inválido.'),
-      'data início': string()
+      startDate: string()
         .required()
-        .test('testDate', (value) => !!DateHelper.parseReportDate(value)),
+        .test({
+          test: this.isValidDate,
+          message: (value: ValidationError) =>
+            `O valor da "data início" (${value.value}) deve estar no formato "mm/dd/YYYY HH:mm"`,
+        }),
       status: string().required(),
-      'data status': string().required().test('testDate', this.isValidDate),
-      'data cancelamento': string()
+      statusDate: string()
+        .required()
+        .test({
+          test: this.isValidDate,
+          message: (value: ValidationError) =>
+            `O valor de "data status" (${value.value}) deve estar no formato "mm/dd/YY HH:mm"`,
+        }),
+      cancellationDate: string()
         .optional()
         .nullable()
-        .test('testDate', (value) => {
-          if (!value) return true;
+        .test({
+          test: (value) => {
+            if (!value) return true;
 
-          return this.isValidDate(value);
+            return this.isValidDate(value);
+          },
+          message: (value: ValidationError) =>
+            `O valor de "data cancelamento" (${value.value}) deve estar no formato "mm/dd/YY HH:mm"`,
         }),
-      valor: string().required(),
-      'próximo ciclo': string().required().test('testDate', this.isValidDate),
-      'ID assinante': string().required(),
+      amount: string().required(),
+      nextCycle: string()
+        .required()
+        .test({
+          test: this.isValidDate,
+          message: (value: ValidationError) =>
+            `O valor de "próximo ciclo" (${value.value}) deve estar no formato "mm/dd/YYYY"`,
+        }),
+      subscriberId: string().required(),
     });
 
     try {

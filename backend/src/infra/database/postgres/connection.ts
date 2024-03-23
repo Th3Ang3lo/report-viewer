@@ -1,9 +1,8 @@
 import knex from 'knex';
-import path from 'node:path';
 
 import { Enviroment } from '../../enviroment';
 
-const config = {
+export const connectionConfig = () => ({
   client: 'pg',
   connection: Enviroment.getPostgresURL(),
   log: {
@@ -22,8 +21,6 @@ const config = {
     directory: './seeds',
     loadExtensions: ['.ts', '.js'],
   },
-};
+});
 
-export const postgresClient = knex(config);
-
-export default config;
+export const postgresClient = () => knex(connectionConfig());
