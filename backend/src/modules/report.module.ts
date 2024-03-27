@@ -9,7 +9,10 @@ import { ReportDataRepositoryImplementation } from '@/infra/database/postgres/re
 @Module({
   imports: [],
   providers: [
-    CreateReportService,
+    {
+      provide: 'CreateReportService',
+      useClass: CreateReportService,
+    },
     {
       provide: 'CSVReader',
       useClass: CSVReaderImplementationProvider,
