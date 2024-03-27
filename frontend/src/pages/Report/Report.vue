@@ -2,9 +2,9 @@
 import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import TimeScaleChart from '@/components/Charts/TimeScaleChart.vue';
-import VueDatePicker from '@vuepic/vue-datepicker';
+import VueDatePicker, { ModelValue } from '@vuepic/vue-datepicker';
 
-const dateValue = ref({});
+const dateValue = ref<ModelValue>();
 
 setInterval(() => console.log(dateValue.value), 100);
 
@@ -41,11 +41,8 @@ const data = [
                   <h3>Faturamento</h3>
                 
                   <VueDatePicker
-                    :v-model="dateValue"
+                    v-model="dateValue"
                     placeholder="Período"
-                    locale="pt-BR"
-                    :noHoursOverlay="true"
-                    :text-input="{ format: 'MM.dd.yyyy' }"
                     range
                   />
                 </div>
