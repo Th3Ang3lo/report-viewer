@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
 import ReportSection from "@/components/Reports/ReportSection.vue";
 import Modal from "@/components/Modal/Modal.vue";
 import ImportReport from "@/components/Reports/ImportReport.vue";
 import ButtonComponent from "@/components/Button/ButtonComponent.vue";
 import { listAllReports } from "@/services/list-all-reports";
-import { Report } from "@/services/dtos/list-all-reports.dto";
-import { onMounted, ref } from "vue";
+import { Report } from "@/dtos/report";
 
 const reports = ref<Report[]>([]);
 

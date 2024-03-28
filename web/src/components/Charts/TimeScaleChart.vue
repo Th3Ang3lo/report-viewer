@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { Line } from 'vue-chartjs'
+
 const props = defineProps<{
   datasets: Array<{
     label: string
     backgroundColor: string
     data: any[]
   }>,
-  labels: string[]
+  labels: string[],
 }>();
 
 import {
@@ -18,7 +20,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js'
-import { Line } from 'vue-chartjs'
 
 const data = {
   labels: props.labels,

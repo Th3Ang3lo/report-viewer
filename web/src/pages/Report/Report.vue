@@ -1,24 +1,108 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { onMounted, ref } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 import TimeScaleChart from '@/components/Charts/TimeScaleChart.vue';
 import VueDatePicker, { ModelValue } from '@vuepic/vue-datepicker';
+import { listReportData } from '@/services/list-report-data';
+import { months } from '@/constants/months';
+import { ReportData } from '@/dtos/report-data';
+import { orderPeriods } from '@/utils/string'
 
-const dateValue = ref<ModelValue>();
+interface ReportContract {
+  label: string,
+  backgroundColor: string,
+  data: number[]
+};
 
-setInterval(() => console.log(dateValue.value), 100);
+const router = useRoute();
 
-const labels = [
-  'Janeiro', 'Fevereiro', 'Março'
-];
+const dateValue = ref<ModelValue>(new Date(2020, 0, 1));
 
-const data = [
-    {
-        label: 'teste',
-        backgroundColor: '#f0f0f0',
-        data: [10, 20, 5]
+const isLoading = ref<boolean>(false);
+const subscriptionLabels = ref<string[]>([]);
+const subscriptionData = ref<ReportContract[]>([]);
+
+const cancellationLabels = ref<string[]>([]);
+const cancellationData = ref<ReportContract[]>([]);
+
+function buildReport(data: ReportData[], type: 'subscription' | 'cancellation') {
+  let labels: string[] = [];
+  let reportDataBuilded: Record<string, number> = {};
+
+  for (const reportData of data) {
+    const date = new Date(reportData.startDate);
+
+    const month = months[date.getMonth()];
+    const monthAndyear = `${month}/${date.getFullYear()}`;
+
+    if(!labels.includes(monthAndyear)) {
+      labels.push(monthAndyear);
     }
-];
+
+    if(!reportDataBuilded[monthAndyear]) {
+      reportDataBuilded[monthAndyear] = 0;
+    }
+
+    if(type === 'subscription') {
+      reportDataBuilded[monthAndyear] += reportData.amount;
+    } else {
+      reportDataBuilded[monthAndyear]++;
+    }
+  }
+
+  labels = labels.sort(orderPeriods)
+
+  return {
+    labels,
+    data: reportDataBuilded
+  };
+}
+
+async function handleChangeDate() {
+  const startDate = dateValue.value;
+
+  if(startDate instanceof Date) {
+    const day = startDate.getDate();
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth() + 1;
+
+    const format = `${year}-${month}-${day}`;
+
+    const reportId = router.params.id as string;
+
+    isLoading.value = true;
+    
+    const [subscriptionRequest, cancellationRequests] = await Promise.all([
+      listReportData(reportId, { startDate: format, status: 'Ativa' }),
+      listReportData(reportId, { startDate: format, status: 'Cancelada' }),
+    ]);
+
+    const subscriptionReport = buildReport(subscriptionRequest.response?.reportData!, 'subscription');
+    const cancellationReport = buildReport(cancellationRequests.response?.reportData!, 'cancellation');
+
+    subscriptionLabels.value = subscriptionReport.labels;
+    subscriptionData.value = [
+      {
+        backgroundColor: '#4F46E5',
+        data: Object.values(subscriptionReport.data),
+        label: 'R$ Assinaturas'
+      }
+    ];
+
+    cancellationLabels.value = cancellationReport.labels;
+    cancellationData.value = [
+      {
+        backgroundColor: '#4F46E5',
+        data: Object.values(cancellationReport.data),
+        label: 'Cancelamentos'
+      }
+    ];
+
+    isLoading.value = false;
+  }
+}
+
+onMounted(() => handleChangeDate())
 </script>
 
 <template>
@@ -42,12 +126,19 @@ const data = [
                 
                   <VueDatePicker
                     v-model="dateValue"
-                    placeholder="Período"
-                    range
+                    placeholder="Início"
+                    @update:model-value="handleChangeDate"
+                    :enable-time-picker="false"
                   />
                 </div>
 
-                <time-scale-chart :labels="labels" :datasets="data" class="mt-4"/>
+                <time-scale-chart
+                  v-if="!isLoading"
+                  :labels="subscriptionLabels"
+                  :datasets="subscriptionData"
+                  class="mt-4"
+                  ref="subscriptionReportRef"
+                />
               </div>
             </section>
 
@@ -55,7 +146,11 @@ const data = [
               <div class="bg-gray-100 w-full rounded-md p-2">
                 <h3>Cancelamentos</h3>
 
-                <time-scale-chart :labels="labels" :datasets="data" />
+                <time-scale-chart
+                  v-if="!isLoading"
+                  :labels="cancellationLabels"
+                  :datasets="cancellationData"
+                />
               </div>
             </section>
         </div>

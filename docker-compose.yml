@@ -12,6 +12,8 @@ services:
       POSTGRES_DB: reports
     volumes:
       - ./.docker:/var/lib/postgresql/data
+    networks:
+      - report-viewer-network
   report-viewer-client:
     build:
       context: ./web
@@ -31,7 +33,7 @@ services:
     restart: "no"
     environment:
       - NODE_ENV=production
-      - POSTGRES_URL="postgres://reports:reports@127.0.0.1:5432/reports"
+      - POSTGRES_URL=postgres://reports:reports@report_db:5432/reports
     networks:
       - report-viewer-network
 

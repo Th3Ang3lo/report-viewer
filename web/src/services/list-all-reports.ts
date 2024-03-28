@@ -1,11 +1,19 @@
 import { env } from "@/env";
-import { ListAllReportsResponseDTO } from "./dtos/list-all-reports.dto";
+import { ListAllReportsResponseDTO } from "../dtos/requests/list-all-reports";
 
 export async function listAllReports(): Promise<ListAllReportsResponseDTO> {
-  const response = await fetch(`${env.apiUrl}/reports`);
+  const request = await fetch(`${env.apiUrl}/reports`);
+
+  let response = null;
+
+  try {
+    response = await request.json();
+  } catch (error) {
+    response = null;
+  }
 
   return {
-    status: response.status,
-    response: response.status == 200 ? await response.json() as unknown as ListAllReportsResponseDTO["response"] : null
+    status: request.status,
+    response: request.status == 200 ? response as ListAllReportsResponseDTO["response"] : null
   }
 }

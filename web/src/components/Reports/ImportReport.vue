@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import ButtonComponent from '@/components/Button/ButtonComponent.vue';
 import AlertMessage from '@/components/Alert/AlertMessage.vue';
-import { ref } from 'vue';
-import { env } from '@/env';
-import { useRouter } from 'vue-router';
+import { createReport } from '@/services/create-report';
 
 const fileSelected = ref<null | string>(null);
 const fileRef = ref<File | null>();
@@ -23,6 +24,7 @@ function handleSelectFile(event: Event): void {
   if(file) {
     fileSelected.value = file.name;
     fileRef.value = file;
+    fileError.value = '';
   }
 }
 
@@ -42,47 +44,40 @@ async function handleSubmit(): Promise<void> {
 
   formData.append('name', reportName!);
   formData.append('file', reportFile!);
+  
+  let error = false;
 
   if(!reportName || reportName.toString() == '') {
     nameError.value = 'Nome obrigatório.';
+    error = true;
     return;
   }
 
   if(!reportFile) {
-    nameError.value = 'Arquivo obrigatório.';
+    fileError.value = 'Arquivo obrigatório.';
+    error = true;
+  }
+
+  if (error) {
+    sending.value = true;
     return;
   }
 
   sending.value = true;
 
-  const request = await fetch(`${env.apiUrl}/reports/upload`, {
-    method: 'POST',
-    body: formData
-  });
-
-  try {
-    const response = await request.json();
-
-    if (request.status !== 201) {
-      fileError.value = response.message ?? 'Houve um erro desconhecido.'
-
-      return;
-    }
-
+  const request = await createReport(formData);
+  
+  if (request.status == 201) {
     success.value = 'Relatório criado com sucesso. Redirecionando...';
 
-    setTimeout(() => router.push(`/${response.id}`), 500);
-  } catch (error) {
-    console.log(error);
-    
-    fileError.value = 'Houve um erro desconhecido.'
-  } finally {
-    sending.value = false;
+    setTimeout(() => router.push(`/${request.response?.id}`), 500);
 
-    fileRef.value = null;
-    fileSelected.value = null;
-    name.value = null;
+    return;
   }
+
+  fileError.value = request.response?.message ?? 'Houve um erro desconhecido.'
+
+  sending.value = false;
 }
 
 </script>

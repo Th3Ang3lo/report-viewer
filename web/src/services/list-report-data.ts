@@ -1,17 +1,25 @@
 import { env } from "@/env";
-import { ListAllReportsResponseDTO } from "./dtos/list-all-reports.dto";
+import { ListAllReportDataResponseDTO } from "@/dtos/requests/list-report-data";
 
 export interface ReportDataFilters {
-  startDate: Date,
+  startDate: string,
   status: string
 }
-export async function listReportData(reportId: string, filters?: ReportDataFilters): Promise<ListAllReportsResponseDTO> {
+export async function listReportData(reportId: string, filters?: ReportDataFilters): Promise<ListAllReportDataResponseDTO> {
   const params = new URLSearchParams(filters as any);
   
-  const response = await fetch(`${env.apiUrl}/reports/${reportId}?${params}`);
+  const request = await fetch(`${env.apiUrl}/reports/${reportId}?${params}`);
+
+  let response = null;
+
+  try {
+    response = await request.json();
+  } catch (error) {
+    response = null;
+  }
 
   return {
-    status: response.status,
-    response: response.status == 200 ? response.json() as unknown as ListAllReportsResponseDTO["response"] : null
+    status: request.status,
+    response: request.status == 200 ? response as ListAllReportDataResponseDTO["response"] : null
   }
 }

@@ -7,7 +7,7 @@ export class Report {
   public createdAt: Date;
 
   public constructor(params: Params) {
-    this.id = randomUUID();
+    this.id = params.id ?? randomUUID();
     this.name = params.name;
     this.createdAt = params.createdAt ?? new Date();
   }

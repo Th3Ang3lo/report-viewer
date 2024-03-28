@@ -11,7 +11,7 @@ export const reportUploadConfig: MulterOptions = {
   fileFilter: (_, file, callback) => {
     if (file.mimetype !== 'text/csv') {
       return callback(
-        new HttpException('File is not a valid CSV.', 200),
+        new HttpException('O arquivo não é um CSV válido.', 200),
         false,
       );
     }
