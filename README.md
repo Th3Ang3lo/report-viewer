@@ -30,5 +30,5 @@ docker-compose up -d
 
 4 - Done!
 
-- Access your Browser on http://localhost:3000 (Client)
-- Access your Browser on http://localhost:3001 (Backend)
+- Access your Browser on http://localhost:3001 (Client)
+- Access your Browser on http://localhost:3000 (Backend)
