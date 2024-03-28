@@ -2,11 +2,10 @@ import { resolve } from 'node:path';
 import { cwd } from 'process';
 import { Test } from '@nestjs/testing';
 
-import { ReportUploadController } from './report.controller';
+import { ReportUploadController } from './report-upload.controller';
 import { ReportsRepositoryMock } from '@/__tests__/mocks/repositories/reports.repository.mock';
 import { ReportDataRepositoryMock } from '@/__tests__/mocks/repositories/report-data.repository.mock';
 import { CSVReaderImplementationProvider } from '@/providers/implementations/csv-reader-impl.provider';
-import { HttpException } from '@nestjs/common';
 import { CreateReportServiceMock } from '@/__tests__/mocks/services/create-report.service.mock';
 
 const name = ReportUploadController.name;

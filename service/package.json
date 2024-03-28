@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build && tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "npm run migration:run && nest start",
     "start:dev": "nest start --watch -r tsconfig-paths/register",
     "start:debug": "nest start --debug --watch -r tsconfig-paths/register",
     "start:prod": "node dist/main",
@@ -35,6 +35,7 @@
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
+    "tsc-alias": "^1.8.8",
     "yup": "^1.4.0"
   },
   "devDependencies": {

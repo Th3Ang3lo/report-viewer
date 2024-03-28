@@ -11,13 +11,13 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 import { reportUploadConfig } from '@/infra/config/report-upload.config';
 import { CreateReportService } from '@/services/reports/create-report.service';
-import { CreateReportRequestDTO } from './dtos/report.controller.dto';
+import { CreateReportRequestDTO } from './dtos/report-upload.controller.dto';
 
 @Controller('reports')
 export class ReportUploadController {
   public constructor(
     @Inject('CreateReportService')
-    private _reportService: CreateReportService,
+    private _createReportService: CreateReportService,
   ) {}
 
   @Post('upload')
@@ -29,7 +29,7 @@ export class ReportUploadController {
     const { path } = file;
     const { name } = body;
 
-    await this._reportService.process({
+    await this._createReportService.process({
       name,
       path,
     });

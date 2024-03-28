@@ -4,6 +4,7 @@ import { Enviroment } from '../../enviroment';
 
 export const connectionConfig = () => ({
   client: 'pg',
+  pool: { min: 0, max: 1 },
   connection: Enviroment.getPostgresURL(),
   log: {
     warn(message: string) {

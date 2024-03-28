@@ -12,4 +12,12 @@ export class ReportsRepositoryImplementation implements ReportsRepository {
 
     return ReportDBMapper.fromDatabase(createReport[0]).toEntity();
   }
+
+  public async findAll(): Promise<Report[]> {
+    const reports = await postgresClient().table('reports');
+
+    return reports.map((report) =>
+      ReportDBMapper.fromDatabase(report).toEntity(),
+    );
+  }
 }

@@ -2,7 +2,7 @@ import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { CSVReaderProvider } from '@/providers/csv-reader.provider';
 import { ReportDataCSVDTO } from '@/shared/dtos/report-data.dto';
 import { ReportValidation } from '@/validations/report.validation';
-import { CreateReportParams } from '../dtos/reports/create-report.service.dto';
+import { CreateReportParamsDTO } from '../dtos/reports/create-report.service.dto';
 import { ReportsRepository } from '@/infra/database/postgres/repositories/reports.repository';
 import { ReportDataRepository } from '@/infra/database/postgres/repositories/report-data.repository';
 import { Report } from '@/domain/entities/report.entity';
@@ -24,7 +24,7 @@ export class CreateReportService {
     private _reportDataRepository: ReportDataRepository,
   ) {}
 
-  public async process(params: CreateReportParams): Promise<true> {
+  public async process(params: CreateReportParamsDTO): Promise<true> {
     await this.validateReportCsvFile(params.path);
 
     await this.saveReport(params);
@@ -32,7 +32,7 @@ export class CreateReportService {
     return true;
   }
 
-  private async saveReport(params: CreateReportParams) {
+  private async saveReport(params: CreateReportParamsDTO) {
     const report = new Report({
       name: params.name,
     });
@@ -45,6 +45,7 @@ export class CreateReportService {
       params.path,
       async (data: ReportDataCSVDTO) => {
         const reportData = this.getParsedCSVBody(data);
+        reportData.reportId = report.id;
 
         chunk.push(reportData);
 

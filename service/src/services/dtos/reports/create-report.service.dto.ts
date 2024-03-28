@@ -1,8 +1,8 @@
-export interface CreateReportParams {
+export interface CreateReportParamsDTO {
   path: string;
   name: string;
 }
 
-export interface CreateReportOutput {
+export interface CreateReportOutputDTO {
   id: string;
 }

@@ -3,25 +3,23 @@ import ReportSection from "@/components/Reports/ReportSection.vue";
 import Modal from "@/components/Modal/Modal.vue";
 import ImportReport from "@/components/Reports/ImportReport.vue";
 import ButtonComponent from "@/components/Button/ButtonComponent.vue";
+import { listAllReports } from "@/services/list-all-reports";
+import { Report } from "@/services/dtos/list-all-reports.dto";
+import { onMounted, ref } from "vue";
 
-const members = [
-    {
-        name: "Relatório teste",
-        id: "9c678328-3e40-46ea-94c7-03cf72530489"
-    },
-    {
-        name: "Relatório teste",
-        id: "fef87dd3-efc1-49d8-b8bc-cf27135dbe73"
-    },
-    {
-        name: "Relatório teste",
-        id: "cc9c90eb-13da-48d4-ac81-db8d532dab62"
-    },
-    {
-        name: "Relatório teste",
-        id: "656b6bee-c3f7-4d12-b629-ffa843e54b84"
+const reports = ref<Report[]>([]);
+
+async function loadReports() {
+    const response = await listAllReports()
+
+    if (response.status == 200) {
+        reports.value = response.response?.reports!;
     }
-];
+}
+
+onMounted(() => {
+    loadReports();
+})
 </script>
 
 <template>
@@ -52,7 +50,7 @@ const members = [
             </div>
 
             <section class="mt-12">
-                <report-section v-for="(report, idx) in members" :id="report.id" :name="report.name" :key="idx" />
+                <report-section v-for="(report, idx) in reports" :id="report.id" :name="report.name" :key="idx" />
             </section>
         </div>
     </div>
