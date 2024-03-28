@@ -12,6 +12,7 @@ const name = ref<HTMLInputElement | null>();
 const nameError = ref<string>('');
 const fileError = ref<string>('');
 const success = ref<string>('');
+const sending = ref(false);
 
 const router = useRouter();
 
@@ -48,26 +49,41 @@ async function handleSubmit(): Promise<void> {
   }
 
   if(!reportFile) {
-    nameError.value = 'Nome obrigatório.';
+    nameError.value = 'Arquivo obrigatório.';
     return;
   }
+
+  sending.value = true;
 
   const request = await fetch(`${env.apiUrl}/reports/upload`, {
     method: 'POST',
     body: formData
   });
 
-  const response = await request.json();
+  try {
+    const response = await request.json();
 
-  if(response.status !== 200) {
-    fileError.value = response.message ?? 'Houve um erro desconhecido.'
+    if (request.status !== 201) {
+      fileError.value = response.message ?? 'Houve um erro desconhecido.'
+
+      return;
+    }
+
+    success.value = 'Relatório criado com sucesso. Redirecionando...';
+
+    setTimeout(() => router.push(`/${response.id}`), 500);
+  } catch (error) {
+    console.log(error);
+    
+    fileError.value = 'Houve um erro desconhecido.'
+  } finally {
+    sending.value = false;
+
+    fileRef.value = null;
+    fileSelected.value = null;
+    name.value = null;
   }
-
-  success.value = 'Relatório criado com sucesso. Redirecionando...';
-
-  setTimeout(() => router.push(`/${response.id}`), 500);
 }
-
 
 </script>
 
@@ -94,8 +110,8 @@ async function handleSubmit(): Promise<void> {
   <span class="text-green-500">{{ success }}</span>
 
   <div class="mt-2">
-    <button-component class="w-full py-3" tabindex="2" type="submit" @click="handleSubmit">
-      Enviar
+    <button-component class="w-full py-3" tabindex="2" type="submit" @click="handleSubmit" :disabled="sending">
+      {{ sending ? 'Enviando...' : 'Enviar' }}
     </button-component>
   </div>
 </template>

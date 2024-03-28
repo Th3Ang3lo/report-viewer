@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { reportUploadConfig } from '@/infra/config/report-upload.config';
 import { CreateReportService } from '@/services/reports/create-report.service';
 import { CreateReportRequestDTO } from './dtos/report-upload.controller.dto';
+import { Report } from '@/domain/entities/report.entity';
 
 @Controller('reports')
 export class ReportUploadController {
@@ -25,11 +26,11 @@ export class ReportUploadController {
   public async upload(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateReportRequestDTO,
-  ): Promise<void> {
+  ): Promise<Report> {
     const { path } = file;
     const { name } = body;
 
-    await this._createReportService.process({
+    return await this._createReportService.process({
       name,
       path,
     });

@@ -24,15 +24,13 @@ export class CreateReportService {
     private _reportDataRepository: ReportDataRepository,
   ) {}
 
-  public async process(params: CreateReportParamsDTO): Promise<true> {
+  public async process(params: CreateReportParamsDTO): Promise<Report> {
     await this.validateReportCsvFile(params.path);
 
-    await this.saveReport(params);
-
-    return true;
+    return await this.saveReport(params);
   }
 
-  private async saveReport(params: CreateReportParamsDTO) {
+  private async saveReport(params: CreateReportParamsDTO): Promise<Report> {
     const report = new Report({
       name: params.name,
     });
@@ -62,6 +60,8 @@ export class CreateReportService {
     if (chunk.length > 0) {
       await this._reportDataRepository.createMany(chunk);
     }
+
+    return report;
   }
 
   private async validateReportCsvFile(path: string) {
